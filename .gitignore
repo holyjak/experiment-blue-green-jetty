@@ -2,3 +2,5 @@ haproxy-vm/.vagrant
 haproxy-vm/apache-maven-3.1.0/
 stateless-hello-webapp/.idea
 stateless-hello-webapp/stateless-hello-webapp.iml
+stateless-hello-webapp/target/
+stateless-hello-webapp/.extract/

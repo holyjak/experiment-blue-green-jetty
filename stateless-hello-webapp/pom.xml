@@ -18,13 +18,21 @@
   <build>
       <plugins>
           <plugin>
-              <groupId>org.eclipse.jetty</groupId>
-              <artifactId>jetty-maven-plugin</artifactId>
-              <version>9.0.5.v20130815</version>
-              <configuration>
-                  <scanIntervalSeconds>1</scanIntervalSeconds>
-              </configuration>
-
+              <groupId>org.apache.tomcat.maven</groupId>
+              <artifactId>tomcat7-maven-plugin</artifactId>
+              <version>2.0</version>
+              <executions>
+                  <execution>
+                      <id>tomcat-run</id>
+                      <goals>
+                          <goal>exec-war-only</goal>
+                      </goals>
+                      <phase>package</phase>
+                      <configuration>
+                          <path>/</path>
+                      </configuration>
+                  </execution>
+              </executions>
           </plugin>
       </plugins>
     <finalName>stateless-hello-webapp</finalName>
