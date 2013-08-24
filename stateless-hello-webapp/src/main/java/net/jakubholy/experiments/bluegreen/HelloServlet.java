@@ -38,11 +38,22 @@ public class HelloServlet extends HttpServlet {
         response.getWriter().println("<br>Running since " + INITIALIZED);
         response.getWriter().println("<br>Your session=" + session.getId() + ", started: " + sessionStart);
 
-        final String env = System.getProperty("env");
-        if (env == null) {
-            response.getWriter().println("<p style='background:red'>ERROR: env (blue/green) not specified via a system property 'env' as expected</p>");
+        String zone = System.getProperty("zone");
+        if (zone == null) {
+            response.getWriter().println("<p style='background:red'>ERROR: env (blue/green) not specified via a system property 'zone' as expected</p>");
+            zone = "undefined";
         }
-        response.getWriter().println("<p style='background:" + env + ";width:100%'>Env: " + env + "</p>");
+
+        String switchJS = "";
+        if (acceptingNewConnections.get()) {
+            // Fake the cookie used by haproxy to send an existing session to its server (value prefixed by zone ~ ):
+            String otherZone = zone.equals("blue")? "green" : "blue";
+            // FIXME do st. to go to the other server
+            String js = "javascript:false;"; // document.location.reload(true);
+            switchJS = " [<a href='" + js + "'>Switch to the previous version</a>]";
+        }
+
+        response.getWriter().println("<p style='background:lightgrey;width:100%'>Env: " + zone + switchJS + "</p>");
 
     }
 

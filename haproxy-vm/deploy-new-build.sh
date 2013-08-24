@@ -17,6 +17,7 @@ touch $lock || fail "Creating $lock failed"
 
 # 1. Build the app if necessary
 if [ ! -f $BINARY ]; then
+  echo ">> Building the app (existing binary not found)..."
   cd /webapp; $MVN package || fail "mvn package failed"
 fi
 
@@ -55,6 +56,7 @@ cd $target; java -Dzone=$target_zone -jar $BINARY_NAME -httpPort $zone_port &
 echo $target_zone > $ZONE_FILE
 
 # 7. Switch to it
+sleep 10 # wait until it is up
 /vagrant/switch-to-server.sh $target_zone
 
 # 8. rm the lock

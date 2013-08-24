@@ -50,3 +50,13 @@ TODO
 * Make a deployment script that deployes to the current "previous" instance (and handles also the initial deployment)
 * Make a (Gatling?) test to verify the sessions stay unbroken while all new requests go to the new instance
 * Install Maven during provisioning
+
+---
+From the docs
+
+The "force-persist" statement allows one to declare various ACL-based
+  conditions which, when met, will cause a request to ignore the down status of
+  a server and still try to connect to it. That makes it possible to start a
+  server, still replying an error to the health checks, and run a specially
+  configured browser to test the service. Among the handy methods, one could
+  use a specific source IP address, or a specific cookie.
