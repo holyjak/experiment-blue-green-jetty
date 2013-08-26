@@ -19,7 +19,7 @@ public class HelloServlet extends HttpServlet {
     private static final String HEALTH_DISABLE_URL = HEALTH_URL + "/disable";
     private static final String HEALTH_ENABLE_URL = HEALTH_URL + "/enable";
 
-    private static AtomicBoolean acceptingNewConnections = new AtomicBoolean(true);
+    private static AtomicBoolean newestVersion = new AtomicBoolean(true);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -34,9 +34,6 @@ public class HelloServlet extends HttpServlet {
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("<h1>Hello Servlet</h1>");
-        response.getWriter().println("<br>Running since " + INITIALIZED);
-        response.getWriter().println("<br>Your session=" + session.getId() + ", started: " + sessionStart);
 
         String zone = System.getProperty("zone");
         if (zone == null) {
@@ -44,16 +41,17 @@ public class HelloServlet extends HttpServlet {
             zone = "undefined";
         }
 
-        String switchJS = "";
-        if (acceptingNewConnections.get()) {
-            // Fake the cookie used by haproxy to send an existing session to its server (value prefixed by zone ~ ):
-            String otherZone = zone.equals("blue")? "green" : "blue";
-            // FIXME do st. to go to the other server
-            String js = "javascript:false;"; // document.location.reload(true);
-            switchJS = " [<a href='" + js + "'>Switch to the previous version</a>]";
-        }
+        final String otherZone = zone.equals("blue")? "green" : "blue";
+        final String js = "javascript:document.cookie=\"X-Force-Zone=" + otherZone + "\";document.location.reload(true);false";
+        final String versionLabel = newestVersion.get()? "previous" : "newest";
+        final String switchJS = "[<a onclick='" + js + "'>Switch to the " + versionLabel + " version</a>]";
 
-        response.getWriter().println("<p style='background:lightgrey;width:100%'>Env: " + zone + switchJS + "</p>");
+        response.getWriter().println("<p style='background:lightgrey;width:100%'><span style='color:" + zone +
+                ";font-style:bold;'>Env: " + zone + "</span> " + switchJS + "</p>");
+
+        response.getWriter().println("<h1>Hello Servlet</h1>");
+        response.getWriter().println("<br>Running since " + INITIALIZED);
+        response.getWriter().println("<br>Your session=" + session.getId() + ", started: " + sessionStart);
 
     }
 
@@ -63,7 +61,7 @@ public class HelloServlet extends HttpServlet {
     @Override
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (HEALTH_URL.equals(req.getRequestURI())) {
-            final int status = acceptingNewConnections.get()? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+            final int status = newestVersion.get()? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE;
             resp.setStatus(status);
         } else {
             super.doHead(req, resp);
@@ -77,11 +75,11 @@ public class HelloServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (HEALTH_DISABLE_URL.equals(req.getRequestURI())) {
-            boolean wasEnabled = acceptingNewConnections.getAndSet(false);
+            boolean wasEnabled = newestVersion.getAndSet(false);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getWriter().println(wasEnabled? "DISABLING the server" : "NoOp, already disabled");
         } else if (HEALTH_ENABLE_URL.equals(req.getRequestURI())) {
-            boolean wasEnabled = acceptingNewConnections.getAndSet(true);
+            boolean wasEnabled = newestVersion.getAndSet(true);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getWriter().println(wasEnabled? "NoOp, already enabled" : "ENABLING the server");
         } else {
