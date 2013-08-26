@@ -44,7 +44,7 @@ public class HelloServlet extends HttpServlet {
         final String otherZone = zone.equals("blue")? "green" : "blue";
         final String js = "javascript:document.cookie=\"X-Force-Zone=" + otherZone + "\";document.location.reload(true);false";
         final String versionLabel = newestVersion.get()? "previous" : "newest";
-        final String switchJS = "[<a onclick='" + js + "'>Switch to the " + versionLabel + " version</a>]";
+        final String switchJS = "[<a href='" + js + "'>Switch to the " + versionLabel + " version</a>]";
 
         response.getWriter().println("<p style='background:lightgrey;width:100%'><span style='color:" + zone +
                 ";font-style:bold;'>Env: " + zone + "</span> " + switchJS + "</p>");
