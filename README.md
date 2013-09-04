@@ -39,10 +39,8 @@ available for ve. 1.3, there might be better/other ways in newer version).
 
 ### Deployment
 
-TBD
-
-* `haproxy-vm/switch-to-server.sh (blue|green|both)` will tell the instances to report themselves as available/unavailable
-according to the argument.
+The script `haproxy-vm/deploy-new-build.sh` will build a new binary (unless it exists) and deploy it, switching the current
+"current" and "old" zones. (It uses `haproxy-vm/switch-to-server.sh (blue|green|both)` to do the actual switch).
 
 TODO
 ----
