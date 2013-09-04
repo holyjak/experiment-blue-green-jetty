@@ -25,20 +25,15 @@ fi
 current_zone=$(cat $ZONE_FILE)
 if [ -z "$current_zone" ]; then current_zone="blue"; fi
 
-if [ "blue" = "$current_zone" ]; then target_zone="green"; zone_port=9000; 
-else target_zone="blue"; zone_port=8000
+if [ "blue" = "$current_zone" ]; then target_zone="green";  
+else target_zone="blue";
 fi
-echo ">> Current is $current_zone, deploying to $target_zone (at port $zone_port)"
+echo "##### Current is $current_zone, deploying to ===> $target_zone #####"
 
 # 3. Take prev down
 # We should perhaps verify there are no active sessions...
-pid=$(ps aux | grep -- "-Dzone=$target_zone" | cut -f1)
-pid=$(ps -o pid,args -u vagrant | grep java | grep -- "-Dzone=$target_zone" | cut -f2 -d' ')
-if [ ! -z "$pid" ]; then
-  echo ">> Killing pid $pid"
-  kill -9 $pid
-  sleep 5
-fi
+sudo stop "myapp-$target_zone"
+sleep 5 # give it some time to finish...
 
 # 4. Deploy and start the new version over prev
 target="$APP_ROOT/$target_zone"
@@ -46,8 +41,8 @@ mkdir $target 2> /dev/null # if it did not exist ...
 cp $BINARY $target
 # start the app (in practice, we would use st. like upstart to run it as daemon)
 # TBD Run the app as an upstart job (like mongodiffer)
-echo ">>> Starting the app as: cd $target; java -Dzone=$target_zone -jar $BINARY_NAME -httpPort $zone_port &"
-cd $target; java -Dzone=$target_zone -jar $BINARY_NAME -httpPort $zone_port &
+echo ">>> Starting the app..."
+sudo start "myapp-$target_zone"
 
 # 5. Check it is working
 # TBD check the app

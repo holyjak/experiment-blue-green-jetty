@@ -34,7 +34,8 @@ The `haproxy-vm` directory itself is mounted as `/vagrant/`.
 ### Configuration
 
 See the HAProxy configuration below `haproxy-vm/files/etc/`, it is mostly only copied from
-[the documentation](http://haproxy.1wt.eu/download/1.3/doc/architecture.txt) (sections 4.1, 4.2).
+[the documentation](http://haproxy.1wt.eu/download/1.3/doc/architecture.txt) (sections 4.1, 4.2; only 
+available for ve. 1.3, there might be better/other ways in newer version).
 
 ### Deployment
 
@@ -46,7 +47,21 @@ according to the argument.
 TODO
 ----
 
-* Use st. else than cookie for switching (e.g. a header), i.e. st. that is only valid for the 1 request?
-* Make a (Gatling?) test to verify the sessions stay unbroken while all new requests go to the new instance
+Important
+
+* ! verify session not lost on prev upon deployment
+    * Make a (Gatling?) test to verify the sessions stay unbroken while all new requests go to the new instance
+* Inject the swtich+version panel via JS to make it easy to include
+
+Nice to have
+
+* Include current Revision/date in the JS pannel - from mvn build to mvn manifest to Java
 * Cleanup
-* Inject the swtich+version panel via JS to make it easy to include, incl. version from a sys property
+* What happens if having an old session but prev truly dies? (get 500 or st.)
+* Google Analytics for version changes
+* Rename health to status => /status/newest-version
+* Deploy: verify we can curl the new version (and perhaps that we get the siwtching JS back)
+
+### Resources
+
+[HTML documentaton for HAProxy](https://code.google.com/p/haproxy-docs/wiki/AboutHTTP)
