@@ -8,17 +8,12 @@ Intro
 
 Use case: Deploy a new version of a webapp so that all new users are sent to the new
 version while users with open sessions continue using the previous version
-(so that they don't loose their preciously built session state). Users of the new version
-can explicitely ask for the previous version in the case that it doesn't work as expected.
+(so that they don't loose their precious session state). Users of the new version
+can explicitely ask for the previous version in the case that it doesn't work as expected and vice versa.
 
 Benefits: Get new features to users that need them as soon as possible without affecting
-anybody negatively and without risking that a defect will prevent them from working
-(for they can go back to the previous version)
-
-Implementation: HAProxy in front of the instances (version) of the app (blue and green).
-We always deploy to the "previous" version, thus making the "current" into a new "previous".
-We inform the apps whether they should accept new users (yes for curent) via a POST request
-and they communicate it further to HAProxy via its health checks.
+anybody negatively and without risking that a defect will prevent users from achieving their goal
+(thanks to being able to fall back to the previous version).
 
 Implementation
 --------------
@@ -31,10 +26,23 @@ it on an existing Linux machine, see `haproxy-vm/provision.sh`.
 Vagrant will mount the `stateless-hello-webapp` directory in the VM as `/webapp/`.
 The `haproxy-vm` directory itself is mounted as `/vagrant/`.
 
+### How does it work?
+
+HAProxy runs in front of the instances (versions) of the app (blue and green zones) (1).
+We always deploy to the "previous" version, thus making the "current" into a new "previous" (2).
+We inform the apps whether they should accept new users (yes for curent) via a POST request (3)
+and they communicate it further to HAProxy via its health checks.
+
+1. See `haproxy-vm/files/etc/haproxy/haproxy.cfg`
+2. See `haproxy-vm/deploy-new-build.sh`
+3. See `haproxy-vm/switch-to-server.sh`
+4. See haproxy's config again, look for `option httpchk`
+
+
 ### Configuration
 
 See the HAProxy configuration below `haproxy-vm/files/etc/`, it is mostly only copied from
-[the documentation](http://haproxy.1wt.eu/download/1.3/doc/architecture.txt) (sections 4.1, 4.2; only 
+[the documentation](http://haproxy.1wt.eu/download/1.3/doc/architecture.txt) (sections 4.1, 4.2; only
 available for ve. 1.3, there might be better/other ways in newer version).
 
 ### Deployment
