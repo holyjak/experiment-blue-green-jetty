@@ -18,13 +18,26 @@ anybody negatively and without risking that a defect will prevent users from ach
 Implementation
 --------------
 
-### Prerequisities
+### How to run this?
 
-This proof of concept uses Vagrant to fire up and configure a virtual Linux machine. You could also run
-it on an existing Linux machine, see `haproxy-vm/provision.sh`.
+#### Via Vagrant
 
-Vagrant will mount the `stateless-hello-webapp` directory in the VM as `/webapp/`.
-The `haproxy-vm` directory itself is mounted as `/vagrant/`.
+This PoC has been set up to run via Vagrant.
+
+1. Install [Vagrant][1] and [VirtualBox][2]
+2. Run `vagrant up` in `haproxy-vm/` directory to create and run the Vagrant virtual machine (VM)
+3. Run `vagrant ssh` to ssh into the VM
+4. You can now access the PoC webapp via HAProxy via `localhost:8080` from your computer and HAProxy's status page via `localhost:8081` (inside the VM they are at ports `80` and `81`)
+
+Notice that Vagrant will mount the `stateless-hello-webapp` directory in the VM as `/webapp/` and
+the `haproxy-vm` directory itself is mounted as `/vagrant/`.
+
+[1]: http://vagrantup.com/
+[2]: http://virtualbox.org/
+
+#### On Linux
+
+Copy the content of `haproxy-vm` to `/vagrant/` and the content of `stateless-hello-webapp` into `/webapp/` and run `haproxy-vm/provision.sh` as root. Access the app at ports `80` and `81`.
 
 ### How does it work?
 
