@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** A simple servlet responding to clients and handling (settable) health checks from HAProxy. */
-@WebServlet("/*")
+@WebServlet(urlPatterns = {"/js/deployment-bar.js", "/health"})
 public class HelloServlet extends HttpServlet {
 
     private static final Date INITIALIZED = new Date(); // reset upon reload/restart
@@ -24,36 +24,75 @@ public class HelloServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        final HttpSession session = request.getSession(true);
+        if ("/js/deployment-bar.js".equals(request.getRequestURI())) {
+            getDeploymentBarJs(request, response);
+            return;
+        }
 
+        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Only " + HEALTH_URL + " are served via this servlet.");
+
+    }
+
+    private void getDeploymentBarJs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
+
+        // Set session attributes - for testing that relaod doesn't break sessions
+        final HttpSession session = request.getSession(true);
         Object sessionStart = session.getAttribute("sessionStart");
         if (sessionStart == null) {
             sessionStart = "now";
             session.setAttribute("sessionStart", new Date().toString());
         }
+        // end session stuff
 
-        response.setContentType("text/html");
+        // Response
+        response.setContentType("text/javascript");
         response.setStatus(HttpServletResponse.SC_OK);
+        response.setHeader("Cache-Control", "public, max-age=0, no-cache");
+        response.setHeader("Expires", "Sat, 26 Jul 1997 00:00:00 GMT");
 
         String zone = System.getProperty("zone");
         if (zone == null) {
-            response.getWriter().println("<p style='background:red'>ERROR: env (blue/green) not specified via a system property 'zone' as expected</p>");
+            response.getWriter().println("alert('Application configuration ERROR: env (blue/green) not specified via a system property \\'zone\\' as expected');");
             zone = "undefined";
         }
 
         final String otherZone = zone.equals("blue")? "green" : "blue";
-        final String js = "javascript:document.cookie=\"X-Force-Zone=" + otherZone + "\";document.location.reload(true);false";
-        final String versionLabel = newestVersion.get()? "previous" : "newest";
-        final String switchJS = "[<a href='" + js + "'>Switch to the " + versionLabel + " version</a>]";
 
-        response.getWriter().println("<p style='background:lightgrey;width:100%'><span style='color:" + zone +
-                ";font-style:bold;'>Env: " + zone + "</span> " + switchJS + "</p>");
+        final String versionMessage;
+        final String otherVersionLabel;
+        final String bgrColor;
 
-        response.getWriter().println("<h1>Hello Servlet</h1>");
-        response.getWriter().println("<br>Running since " + INITIALIZED);
-        response.getWriter().println("<br>Your session=" + session.getId() + ", started: " + sessionStart);
+        if (newestVersion.get()) {
+            versionMessage = "You are running the newest version, running since " + INITIALIZED; // TODO include build date / git hash?
+            otherVersionLabel = "previous";
+            bgrColor = "darksalmon";
+        } else {
+            versionMessage = "You are running the old version, which will be removed upon the next deployment, consider updating to the newest version";
+            otherVersionLabel = "newest";
+            bgrColor = "darkred";
+        }
 
+        final String swtichVersionUrl = "javascript:document.cookie=\"X-Force-Zone=" + otherZone + "\";document.location.reload(true);false";
+
+        final String jsBarHtml =
+                "<div id='deploymentBar' style='background-color:" + bgrColor + ";position:absolute;top:0px;left:0px;width:100%;'>" +
+                versionMessage +
+                "<span style='float:right'>[<a href='" + swtichVersionUrl + "'>Switch to the " + otherVersionLabel + " version</a>]" +
+                " (zone: " + zone + "; session " + session.getId() + " started: " + sessionStart + ")</span>" +
+                "</div>";
+
+        final String barCreationJs = "var onloadOld=window.onload;window.onload=(function(){\n" +
+                "var body=document.getElementsByTagName('body')[0];\n" +
+                "var elm=document.createElement('div');\n" +
+                "elm.innerHTML='" + jsBarHtml.replaceAll("'", "\\\\'") +"';\n" +
+                "var jsDiv=elm.firstChild;\n" +
+                "body.insertBefore(jsDiv, body.firstChild);\n" +
+                "if (onloadOld) onloadOld();\n" +
+                "});";
+
+        response.getWriter().println(barCreationJs);
     }
+
 
     /**
      * HEAD request to /health is used by HAProxy to check the availability of the server.

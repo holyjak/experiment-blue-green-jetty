@@ -63,6 +63,11 @@ available for ve. 1.3, there might be better/other ways in newer version).
 The script `haproxy-vm/deploy-new-build.sh` will build a new binary (unless it exists) and deploy it, switching the current
 "current" and "old" zones. (It uses `haproxy-vm/switch-to-server.sh (blue|green|both)` to do the actual switch).
 
+### Other Notes
+
+Running the webapp in development mode: `stateless-hello-webapp$ mvn tomcat7:run -Dmaven.tomcat.port=9999`
+Then open `http://localhost:9999/`.
+
 TODO
 ----
 

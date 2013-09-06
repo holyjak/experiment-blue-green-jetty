@@ -21,6 +21,11 @@
               <groupId>org.apache.tomcat.maven</groupId>
               <artifactId>tomcat7-maven-plugin</artifactId>
               <version>2.1</version>
+              <configuration>
+                  <path>/</path>
+                  <backgroundProcessorDelay>1</backgroundProcessorDelay>
+                  <contextReloadable>true</contextReloadable>
+              </configuration>
               <executions>
                   <execution>
                       <id>tomcat-run</id>
