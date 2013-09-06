@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** A simple servlet responding to clients and handling (settable) health checks from HAProxy. */
-@WebServlet(urlPatterns = {"/js/deployment-bar.js", "/health"})
+@WebServlet(urlPatterns = {"/js/deployment-bar.js", "/health", "/health/*"})
 public class HelloServlet extends HttpServlet {
 
     private static final Date INITIALIZED = new Date(); // reset upon reload/restart
