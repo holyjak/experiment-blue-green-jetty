@@ -72,7 +72,7 @@ public class HelloServlet extends HttpServlet {
             bgrColor = "darkred";
         }
 
-        final String swtichVersionUrl = "javascript:document.cookie=\"X-Force-Zone=" + otherZone + "\";document.location.reload(true);false";
+        final String swtichVersionUrl = "javascript:document.cookie=\"X-Force-Zone=" + otherZone + "; Path=/\";document.location.reload(true);false";
 
         final String jsBarHtml =
                 "<div id='deploymentBar' style='background-color:" + bgrColor + ";position:absolute;top:0px;left:0px;width:100%;'>" +
