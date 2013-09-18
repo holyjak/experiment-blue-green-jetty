@@ -6,6 +6,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,7 +23,23 @@ public class HelloServlet extends HttpServlet {
     private static final String HEALTH_DISABLE_URL = HEALTH_URL + "/disable";
     private static final String HEALTH_ENABLE_URL = HEALTH_URL + "/enable";
 
-    private static AtomicBoolean newestVersion = new AtomicBoolean(true);
+    private final AtomicBoolean newestVersion = new AtomicBoolean(true);
+
+    public HelloServlet() {
+        // Compare our zone with the current zone file and set newestVersion accordingly
+        final File currentZoneFile= new File("/usr/local/lib/cs/current_zone");
+        if (currentZoneFile.isFile() && currentZoneFile.canRead()) {
+
+            try {
+                final String zoneFromFile = new BufferedReader(new FileReader(currentZoneFile)).readLine();
+                if (!zoneFromFile.equals(getZone())) {
+                    newestVersion.set(false);
+                }
+            } catch (IOException ignored) {
+                // ignore, assume this is the current version
+            }
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -50,7 +70,7 @@ public class HelloServlet extends HttpServlet {
         response.setHeader("Cache-Control", "public, max-age=0, no-cache");
         response.setHeader("Expires", "Sat, 26 Jul 1997 00:00:00 GMT");
 
-        String zone = System.getProperty("zone");
+        String zone = getZone();
         if (zone == null) {
             response.getWriter().println("alert('Application configuration ERROR: env (blue/green) not specified via a system property \\'zone\\' as expected');");
             zone = "undefined";
@@ -63,7 +83,7 @@ public class HelloServlet extends HttpServlet {
         final String bgrColor;
 
         if (newestVersion.get()) {
-            versionMessage = "You are running the newest version, running since " + INITIALIZED; // TODO include build date / git hash?
+            versionMessage = "You are running the newest version " + getClass().getPackage().getImplementationVersion(); // FIXME make packaging include manifest with the version
             otherVersionLabel = "previous";
             bgrColor = "darksalmon";
         } else {
@@ -91,6 +111,10 @@ public class HelloServlet extends HttpServlet {
                 "});";
 
         response.getWriter().println(barCreationJs);
+    }
+
+    private String getZone() {
+        return System.getProperty("zone");
     }
 
 
