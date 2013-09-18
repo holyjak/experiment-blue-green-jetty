@@ -4,7 +4,7 @@ function fail {
   echo "FAILURE: $1"; exit 1
 }
 
-BINARY_NAME="stateless-hello-webapp-1.0-SNAPSHOT-war-exec.jar"
+BINARY_NAME="stateless-hello-webapp-with-dependencies.war"
 BINARY="/webapp/target/$BINARY_NAME"
 APP_ROOT="/opt/myapp"
 ZONE_FILE="$APP_ROOT/current_zone"
