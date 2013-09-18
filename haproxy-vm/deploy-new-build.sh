@@ -35,7 +35,10 @@ echo "##### Current is $current_zone, deploying to ===> $target_zone #####"
 sudo stop "myapp-$target_zone"
 sleep 5 # give it some time to finish...
 
-# 4. Deploy and start the new version over prev
+# 4. Record the new "current" zone (before starting)
+echo $target_zone > $ZONE_FILE
+
+# 5. Deploy and start the new version over prev
 target="$APP_ROOT/$target_zone"
 mkdir $target 2> /dev/null # if it did not exist ...
 cp $BINARY $target
@@ -44,11 +47,8 @@ cp $BINARY $target
 echo ">>> Starting the app..."
 sudo start "myapp-$target_zone"
 
-# 5. Check it is working
+# 6. Check it is working
 # TBD check the app
-
-# 6. Record the new "current" zone
-echo $target_zone > $ZONE_FILE
 
 # 7. Switch to it
 sleep 10 # wait until it is up
