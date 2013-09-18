@@ -67,7 +67,7 @@ public class HelloServlet extends HttpServlet {
         // Response
         response.setContentType("text/javascript");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader("Cache-Control", "public, max-age=0, no-cache");
+        response.setHeader("Cache-Control", "public, max-age=0, no-cache"); // This is not always enough => we include the zone in the URL to make 2 unique URLs
         response.setHeader("Expires", "Sat, 26 Jul 1997 00:00:00 GMT");
 
         String zone = getZone();
@@ -92,18 +92,19 @@ public class HelloServlet extends HttpServlet {
             otherVersionLabel = "previous";
             bgrColor = "darksalmon";
         } else {
-            versionMessage = "You are running the old version, which will be removed upon the next deployment, consider updating to the newest version";
+            versionMessage = "You are running an old version (" + currentVersion + "), consider switching";
             otherVersionLabel = "newest";
             bgrColor = "darkred";
         }
 
+        // Note: the Path is important to avoid creating different cookies based on where in the app the user is
         final String swtichVersionUrl = "javascript:document.cookie=\"X-Force-Zone=" + otherZone + "; Path=/\";document.location.reload(true);false";
 
         final String jsBarHtml =
                 "<div id='deploymentBar' style='background-color:" + bgrColor + ";position:absolute;top:0px;left:0px;width:100%;'>" +
                 versionMessage +
                 "<span style='float:right'>[<a href='" + swtichVersionUrl + "'>Switch to the " + otherVersionLabel + " version</a>]" +
-                " (zone: " + zone + "; session " + session.getId() + " started: " + sessionStart + ")</span>" +
+                " <span style='color:" + zone + "'>&#x25CF;</span></span>" +
                 "</div>";
 
         final String barCreationJs = "var onloadOld=window.onload;window.onload=(function(){\n" +
@@ -118,7 +119,8 @@ public class HelloServlet extends HttpServlet {
         response.getWriter().println(barCreationJs);
     }
 
-    private String getZone() {
+    /** The name of the deployment zone this app is deployed to (blue or green). */
+    public static String getZone() {
         return System.getProperty("zone");
     }
 
