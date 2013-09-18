@@ -82,8 +82,13 @@ public class HelloServlet extends HttpServlet {
         final String otherVersionLabel;
         final String bgrColor;
 
+        // The version of this build (date, time, git hash); the version is output into a MANIFEST.MF during the build
+        // and accessed here. BEWARE: Will be null if not running the app from the package (i.e. via jetty:run); git
+        // hash will be null if built on a system without git (e.g. inside the Vagrant VM)
+        final String currentVersion = getClass().getPackage().getImplementationVersion();
+
         if (newestVersion.get()) {
-            versionMessage = "You are running the newest version " + getClass().getPackage().getImplementationVersion(); // FIXME make packaging include manifest with the version
+            versionMessage = "You are running the newest version " + currentVersion;
             otherVersionLabel = "previous";
             bgrColor = "darksalmon";
         } else {
